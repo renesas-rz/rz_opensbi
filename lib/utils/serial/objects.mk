@@ -17,3 +17,4 @@ libsbiutils-objs-y += serial/gaisler-uart.o
 libsbiutils-objs-y += serial/shakti-uart.o
 libsbiutils-objs-y += serial/sifive-uart.o
 libsbiutils-objs-y += serial/uart8250.o
+libsbiutils-objs-y += serial/scif_drv.o
