@@ -11,6 +11,7 @@
 #include <sbi/riscv_asm.h>
 #include <sbi/riscv_io.h>
 #include <sbi/sbi_timer.h>
+#include <platform.h>
 
 static u32 plmt_time_hart_count;
 static volatile void *plmt_time_base;
@@ -73,7 +74,8 @@ static struct sbi_timer_device plmt_timer = {
 	.name = "rzfive_plmt",
 	.timer_value = plmt_timer_value,
 	.timer_event_start = plmt_timer_event_start,
-	.timer_event_stop = plmt_timer_event_stop
+	.timer_event_stop = plmt_timer_event_stop,
+	.timer_freq = RZFIVE_MTIMER_FREQ
 };
 
 int plmt_warm_timer_init(void)

@@ -83,9 +83,8 @@ static int rzfive_irqchip_init(bool cold_boot)
 	return plic_warm_irqchip_init(&plic, 2 * hartid, 2 * hartid + 1);
 }
 
-
 /* Initialize platform timer for current HART. */
-static int rzfive_timer_init(bool cold_boot)
+static int rzfive_early_init(bool cold_boot)
 {
 	int ret;
 
@@ -145,13 +144,13 @@ static int rzfive_vendor_ext_provider(long extid, long funcid,
 
 /* Platform descriptor. */
 const struct sbi_platform_operations platform_ops = {
+	.early_init	   = rzfive_early_init,
+
 	.final_init = rzfive_final_init,
 
 	.console_init = rzfive_console_init,
 
 	.irqchip_init = rzfive_irqchip_init,
-
-	.timer_init	   = rzfive_timer_init,
 
 	.vendor_ext_provider = rzfive_vendor_ext_provider
 };
