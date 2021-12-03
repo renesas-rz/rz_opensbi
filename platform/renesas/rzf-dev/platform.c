@@ -65,7 +65,7 @@ static int rzf_final_init(bool cold_boot)
 /* Initialize the platform console. */
 static int rzf_console_init(void)
 {
-    return scif_init();
+	return scif_init();
 }
 
 /* Initialize the platform interrupt controller for current HART. */
@@ -83,18 +83,21 @@ static int rzf_irqchip_init(bool cold_boot)
 	return plic_warm_irqchip_init(&plic, 2 * hartid, 2 * hartid + 1);
 }
 
-/* Initialize platform timer for current HART. */
-static int rzf_timer_init(bool cold_boot)
+/* Platform early initialization. */
+static int rzf_early_init(bool cold_boot)
 {
-	int ret;
+	int ret=0;
 
 	if (cold_boot) {
 		ret = plmt_cold_timer_init(RZF_PLMT_ADDR,
 					   RZF_HART_COUNT);
-		if (ret)
-			return ret;
 	}
+	return ret;
+}
 
+/* Initialize platform timer for current HART. */
+static int rzf_timer_init(bool cold_boot)
+{
 	return plmt_warm_timer_init();
 }
 
@@ -149,6 +152,8 @@ const struct sbi_platform_operations platform_ops = {
 	.console_init = rzf_console_init,
 
 	.irqchip_init = rzf_irqchip_init,
+
+	.early_init = rzf_early_init,
 
 	.timer_init = rzf_timer_init,
 

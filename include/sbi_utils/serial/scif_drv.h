@@ -54,6 +54,5 @@
  */
 int scif_init(void);
 void scif_put_char(char outChar);
-//extern int32_t scif_get_char(uint8_t *inChar);
 
 #endif /* DRIVERS_SCIF_DRIVER_INC_SCIF_DRV_H_ */

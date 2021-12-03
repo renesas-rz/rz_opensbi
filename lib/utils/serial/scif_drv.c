@@ -35,10 +35,7 @@
  Includes   <System Includes> , "Project Includes"
  */
 #include <stdint.h>
-#include <sbi_utils/serial/iodefine.h>
-#include <sbi_utils/serial/scif_iodefine.h>
-#include <sbi_utils/serial/gpio_iodefine.h>
-#include <sbi_utils/serial/cpg_iodefine.h>
+#include "scif_iodefine.h"
 #include <sbi_utils/serial/scif_drv.h>
 #include <sbi/sbi_console.h>
 #include <sbi/sbi_timer.h>
@@ -58,9 +55,6 @@
 /*
  Private (static) variables and functions
  */
-static void scif_poweron(void);
-static void scif_init_pinfunction(void);
-static void scif_wait(void);
 static struct sbi_console_device scif_console = {
     .name         = "scif",
     .console_putc = scif_put_char,
@@ -74,45 +68,41 @@ static struct sbi_console_device scif_console = {
  */
 int scif_init(void)
 {
-    volatile uint16_t data16;
+	volatile uint16_t data16;
 
-    scif_poweron();
+	SCIF_SCR_0 = SCIF_SCR_RCV_TRN_DIS;    /* Disable receive & transmit */
+	SCIF_FCR_0 = SCIF_FCR_RST_ASSRT_TFRF; /* Reset assert tx-FIFO & rx-FIFO */
 
-    SCIF_SCR_0 = SCIF_SCR_RCV_TRN_DIS;    /* Disable receive & transmit */
-    SCIF_FCR_0 = SCIF_FCR_RST_ASSRT_TFRF; /* Reset assert tx-FIFO & rx-FIFO */
+	data16 = SCIF_FSR_0;  /* Dummy read          */
+	SCIF_FSR_0 = 0x0000U; /* Clear all error bit */
 
-    data16 = SCIF_FSR_0;  /* Dummy read          */
-    SCIF_FSR_0 = 0x0000U; /* Clear all error bit */
-
-    data16 = SCIF_LSR_0;  /* Dummy read          */
-    SCIF_LSR_0 = 0x0000U; /* Clear ORER bit      */
+	data16 = SCIF_LSR_0;  /* Dummy read          */
+	SCIF_LSR_0 = 0x0000U; /* Clear ORER bit      */
 
     
-    SCIF_SCR_0 = 0x0000U; /* Select internal clock, SC_CLK pin unused for output pin */
+	SCIF_SCR_0 = 0x0000U; /* Select internal clock, SC_CLK pin unused for output pin */
     
-    SCIF_SMR_0 = 0x0000U; /* Set asynchronous, 8bit data, no-parity, 1 stop and Po/1 */
+	SCIF_SMR_0 = 0x0000U; /* Set asynchronous, 8bit data, no-parity, 1 stop and Po/1 */
 
-    data16 = SCIF_SEMR_0;
-    SCIF_SEMR_0 = data16 & (~SCIF_SEMR_MDDRS); /* Select to access BRR */
-    SCIF_BRR_0 = 0x1AU; /* Select P1(phi)(100MHz)/1, 115.2kbps*/
+	data16 = SCIF_SEMR_0;
+	SCIF_SEMR_0 = data16 & (~SCIF_SEMR_MDDRS); /* Select to access BRR */
+	SCIF_BRR_0 = 0x1AU; /* Select P1(phi)(100MHz)/1, 115.2kbps*/
                         /* : N = 100/(64/2*115200)*10^6-1 = 26=> 0x1A */
 
-    SCIF_SEMR_0 = (data16 | SCIF_SEMR_BRME | SCIF_SEMR_MDDRS); /* Select to access MDDR */
-    SCIF_BRR_0 = 0xffU; /*  = 256*(115200*64/2*(17+1))/(100*10^6) = 0xff */
+	SCIF_SEMR_0 = (data16 | SCIF_SEMR_BRME | SCIF_SEMR_MDDRS); /* Select to access MDDR */
+	SCIF_BRR_0 = 0xffU; /*  = 256*(115200*64/2*(17+1))/(100*10^6) = 0xff */
 
-    scif_wait();     /* wait */
+	sbi_timer_udelay(10);     /* 10u (1/115200) sec wait */
 
-    /* FTCR is left at initial value, because this interrupt isn't used. */
+	/* FTCR is left at initial value, because this interrupt isn't used. */
 
-    SCIF_FCR_0 = SCIF_FCR_RST_NGATE_TFRF; /* Reset negate tx-FIFO, rx-FIFO. */
+	SCIF_FCR_0 = SCIF_FCR_RST_NGATE_TFRF; /* Reset negate tx-FIFO, rx-FIFO. */
 
-    scif_init_pinfunction();
+	SCIF_SCR_0 = SCIF_SCR_RCV_TRN_EN; /* Enable receive & transmit w/SC_CLK=no output */
 
-    SCIF_SCR_0 = SCIF_SCR_RCV_TRN_EN; /* Enable receive & transmit w/SC_CLK=no output */
+	sbi_console_set_device(&scif_console);
 
-    sbi_console_set_device(&scif_console);
-
-    return 0;
+	return 0;
 }
 /*
  * End of function scif_init
@@ -126,93 +116,20 @@ int scif_init(void)
  */
 void scif_put_char(char outChar)
 {
-    uint16_t reg;
+	uint16_t reg;
 
-    while (!(SCIF_FSR_TXD_CHK & SCIF_FSR_0))
-    {
-        /* No Operation */
-    }
+	while (!(SCIF_FSR_TXD_CHK & SCIF_FSR_0))
+	{
+		/* No Operation */
+	}
 
-    SCIF_FTDR_0 = outChar;
-    reg = SCIF_FSR_0;
-    reg &= (~SCIF_FSR_TXD_CHK); /* Clear TEND and TDFE flag */
-    SCIF_FSR_0 = reg;
+	SCIF_FTDR_0 = outChar;
+	reg = SCIF_FSR_0;
+	reg &= (~SCIF_FSR_TXD_CHK); /* Clear TEND and TDFE flag */
+	SCIF_FSR_0 = reg;
 }
 /*
  * End of function scif_put_char
- */
-
-/*
- * Function Name: scif_poweron
- * Description  : Power SCIF module on.
- * Arguments    : none.
- * Return Value : none.
- */
-static void scif_poweron(void)
-{
-	/* Supply power to SPI multi0 module */
-    CPG_CLKON_SCIF = CPG_CLKON_WEN_CH0  | CPG_CLKON_SCIF0_ON;
-
-    while (CPG_CLKON_SCIF0_ON != (CPG_CLKMON_SCIF & CPG_CLKON_SCIF0_ON))
-    {
-        /* No operation */
-        /* Wait for supplying power to SCIF0 module */
-    }
-
-
-    CPG_RST_SCIF = (CPG_RST_SCIF0_WEN | CPG_RST_SCIF0_OFF);
-    /* Reset off for SCIF0 */
-    while (CPG_RSTMON_SCIF0_OFF != (CPG_RSTMON_SCIF & CPG_RSTMON_SCIF0_MSK))
-    {
-        /* No operation */
-        /* Wait for reset off SCIF0 module */
-    }
-}
-/*
- * End of function scif_poweron
- */
-
-/*
- * Function Name: scif_init_pinfunction
- * Description  : Initialize pin function for SCIF.
- * Arguments    : none.
- * Return Value : none.
- */
-static void scif_init_pinfunction(void)
-{
-    GPIO_PWPR = GPIO_PWPR_B0WI_WEN;  /* Write-enable PWPR.PFCWE bit */
-    GPIO_PWPR = GPIO_PWPR_PFCWE_WEN; /* Write-enable PFC registers  */
-
-    if(OTPTMPA1_DEVICE_ID_FIVE_2 != 
-        (REG_OTP_OTPTMPA1 & OTPTMPA1_DEVICE_ID_MASK))
-    {
-        GPIO_PMC16 = GPIO_PMC16_SCIF0; /* Select SCIF0 on P06_4 and P06_3 */
-        GPIO_PFC16 = GPIO_PFC16_SCIF0; /* Select RXD and TXD function */
-    }
-    else
-    {
-        GPIO_PMC18 = GPIO_PMC18_SCIF0; /* Select SCIF0 on P13_1 and P13_0 */
-        GPIO_PFC18 = GPIO_PFC18_SCIF0; /* Select RXD and TXD function */
-    }
-}
-/*
- * End of function scif_init_pinfunction
- */
-/*
- * Function Name: scif_wait
- * Description  : wait for timeout of specified period.
- * Arguments    : x_us: time for wait by [us].
- * Return Value : none.
- */
-static void scif_wait(void)
-{
-    int count;
-
-    for(count=0;count<100;count++);
-
-}
-/*
- * End of function scif_wait
  */
 
 /* End of File */

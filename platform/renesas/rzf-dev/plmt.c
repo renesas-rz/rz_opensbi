@@ -75,6 +75,7 @@ static struct sbi_timer_device plmt_timer = {
 	.timer_value = plmt_timer_value,
 	.timer_event_start = plmt_timer_event_start,
 	.timer_event_stop = plmt_timer_event_stop,
+	.timer_freq = RZFIVE_MTIMER_FREQ
 };
 
 int plmt_warm_timer_init(void)
