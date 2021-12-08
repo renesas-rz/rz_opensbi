@@ -65,7 +65,7 @@ static int rzf_final_init(bool cold_boot)
 /* Initialize the platform console. */
 static int rzf_console_init(void)
 {
-	return scif_init();
+	return scif_init(RZF_SCIF_FREQUENCY,RZF_SCIF_BAUDRATE);
 }
 
 /* Initialize the platform interrupt controller for current HART. */

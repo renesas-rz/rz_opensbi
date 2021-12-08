@@ -1,26 +1,9 @@
 /*
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only
- * intended for use with Renesas products. No other uses are authorized. This
- * software is owned by Renesas Electronics Corporation and is protected under
- * all applicable laws, including copyright laws.
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
- * LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
- * AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
- * TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
- * ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
- * FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES
- * FOR ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES
- * HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software
- * and to discontinue the availability of this software. By using this software,
- * you agree to the additional terms and conditions found by accessing the
- * following link:
- * http://www.renesas.com/disclaimer
+ * SPDX-License-Identifier: BSD-2-Clause
  *
- * Copyright (C) 2020 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
  */
+
 /*
  * File Name    : scif_drv.c
  * Version      : 1.0
@@ -55,6 +38,7 @@
 /*
  Private (static) variables and functions
  */
+static void scif_wait(unsigned long);
 static struct sbi_console_device scif_console = {
     .name         = "scif",
     .console_putc = scif_put_char,
@@ -63,10 +47,11 @@ static struct sbi_console_device scif_console = {
 /*
  * Function Name: scif_init
  * Description  : Initialize SCIF driver.
- * Arguments    : none.
+ * Arguments    : clk : BSS clock.
+                  baudrate : baudrate.
  * Return Value : 0
  */
-int scif_init(void)
+int scif_init(unsigned long clk, unsigned long baudrate)
 {
 	volatile uint16_t data16;
 
@@ -86,13 +71,13 @@ int scif_init(void)
 
 	data16 = SCIF_SEMR_0;
 	SCIF_SEMR_0 = data16 & (~SCIF_SEMR_MDDRS); /* Select to access BRR */
-	SCIF_BRR_0 = 0x1AU; /* Select P1(phi)(100MHz)/1, 115.2kbps*/
-                        /* : N = 100/(64/2*115200)*10^6-1 = 26=> 0x1A */
+	SCIF_BRR_0 = SCBRR_VALUE(clk,baudrate);
+	
 
 	SCIF_SEMR_0 = (data16 | SCIF_SEMR_BRME | SCIF_SEMR_MDDRS); /* Select to access MDDR */
 	SCIF_BRR_0 = 0xffU; /*  = 256*(115200*64/2*(17+1))/(100*10^6) = 0xff */
 
-	sbi_timer_udelay(10);     /* 10u (1/115200) sec wait */
+	scif_wait(baudrate);     /* wait */
 
 	/* FTCR is left at initial value, because this interrupt isn't used. */
 
@@ -130,6 +115,25 @@ void scif_put_char(char outChar)
 }
 /*
  * End of function scif_put_char
+ */
+
+/*
+ * Function Name: scif_wait
+ * Description  : wait for timeout of specified period.
+ * Arguments    : boudrate.
+ * Return Value : none.
+ */
+static void scif_wait(unsigned long boudrate)
+{
+	unsigned long utime;
+	
+	utime = 1000000 / boudrate;
+	utime += 1;
+	
+	sbi_timer_udelay(utime);
+}
+/*
+ * End of function scif_wait
  */
 
 /* End of File */

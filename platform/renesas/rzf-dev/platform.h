@@ -22,6 +22,11 @@
 
 #define RZF_L2C_ADDR			0x13400000
 
+#define RZF_SCIF_ADDR			0x01004B800
+#define RZF_SCIF_FREQUENCY		100000000
+#define RZF_SCIF_BAUDRATE		115200
+
+
 /*Memory and Miscellaneous Registers*/
 #define CSR_MILMB		0x7c0
 #define CSR_MDLMB		0x7c1
