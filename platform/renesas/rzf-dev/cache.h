@@ -1,10 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-2-Clause
  *
- * Copyright (c) 2020 Andes Technology Corporation
- *
- * Authors:
- *   Nylon Chen <nylon7@andestech.com>
+ * Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
  */
 
 uintptr_t mcall_set_mcache_ctl(unsigned long input);

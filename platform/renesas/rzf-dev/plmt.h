@@ -1,10 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-2-Clause
  *
- * Copyright (c) 2019 Andes Technology Corporation
- *
- * Authors:
- *   Zong Li <zong@andestech.com>
+ * Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
  */
 
 #ifndef _RZF_PLMT_H_

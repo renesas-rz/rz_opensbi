@@ -1,11 +1,8 @@
 #
 # SPDX-License-Identifier: BSD-2-Clause
 #
-# Copyright (c) 2019 Andes Technology Corporation
+# Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
 #
-# Authors:
-#   Zong Li <zong@andestech.com>
-#   Nylon Chen <nylon7@andestech.com>
 
 # Compiler flags
 platform-cppflags-y =
