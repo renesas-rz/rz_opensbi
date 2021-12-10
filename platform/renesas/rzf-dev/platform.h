@@ -22,6 +22,7 @@
 #define RZF_SCIF_FREQUENCY		100000000
 #define RZF_SCIF_BAUDRATE		115200
 
+#define RZFIVE_MTIMER_FREQ 12000000
 
 /*Memory and Miscellaneous Registers*/
 #define CSR_MILMB		0x7c0
@@ -116,6 +117,5 @@ enum sbi_ext_andes_fid {
 #define V5_L2C_CTL_DRAMOCTL_MASK    (3UL << V5_L2C_CTL_DRAMOCTL_OFFSET)
 #define V5_L2C_CTL_DRAMICTL_MASK    (1UL << V5_L2C_CTL_DRAMICTL_OFFSET)
 
-#define RZFIVE_MTIMER_FREQ 12000000
 
 #endif /* _RZF_PLATFORM_H_ */

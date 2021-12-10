@@ -19,8 +19,6 @@
 #ifndef DRIVERS_SCIF_DRIVER_INC_SCIF_DRV_H_
 #define DRIVERS_SCIF_DRIVER_INC_SCIF_DRV_H_
 
-#define SCBRR_VALUE(clk,baudrate) (clk/(64/2*baudrate)-1)
-
 /*
  Global Typedef definitions
  */
@@ -32,7 +30,7 @@
 /*
  Exported global functions
  */
-int scif_init(unsigned long, unsigned long);
+int scif_init(unsigned long, unsigned long,unsigned long);
 void scif_put_char(char outChar);
 
 #endif /* DRIVERS_SCIF_DRIVER_INC_SCIF_DRV_H_ */
