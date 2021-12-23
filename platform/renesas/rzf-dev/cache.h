@@ -1,7 +1,12 @@
 /*
  * SPDX-License-Identifier: BSD-2-Clause
  *
- * Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (c) 2019 Andes Technology Corporation
+ *
+ * Authors:
+ *   Zong Li <zong@andestech.com>
+ *
+ * Copyright (c) 2021 Renesas Electronics Corporation
  */
 
 uintptr_t mcall_set_mcache_ctl(unsigned long input);

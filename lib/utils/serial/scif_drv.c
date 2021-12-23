@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-2-Clause
  *
- * Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2021 Renesas Electronics Corporation
  */
 
 /*
@@ -203,12 +203,14 @@ void scif_put_char(char outChar)
  */
 static void scif_wait(unsigned long boudrate)
 {
+
 	unsigned long utime;
 	
 	utime = 1000000 / boudrate;
 	utime += 1;
 	
 	sbi_timer_udelay(utime);
+
 }
 /*
  * End of function scif_wait

@@ -1,7 +1,12 @@
 /*
  * SPDX-License-Identifier: BSD-2-Clause
  *
- * Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (c) 2019 Andes Technology Corporation
+ *
+ * Authors:
+ *   Zong Li <zong@andestech.com>
+ *
+ * Copyright (c) 2021 Renesas Electronics Corporation
  */
 
 #ifndef _RZF_PLATFORM_H_
@@ -18,7 +23,7 @@
 
 #define RZF_L2C_ADDR			0x13400000
 
-#define RZF_SCIF_ADDR			0x01004B800
+#define RZF_SCIF_ADDR			0x1004B800
 #define RZF_SCIF_FREQUENCY		100000000
 #define RZF_SCIF_BAUDRATE		115200
 
