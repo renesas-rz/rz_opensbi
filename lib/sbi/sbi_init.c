@@ -48,6 +48,14 @@ static void sbi_boot_print_banner(struct sbi_scratch *scratch)
 		   OPENSBI_VERSION_MINOR);
 #endif
 
+#ifdef OPENSBI_BUILD_TIME_STAMP
+	sbi_printf("Build time: %s\n", OPENSBI_BUILD_TIME_STAMP);
+#endif
+
+#ifdef OPENSBI_BUILD_COMPILER_VERSION
+	sbi_printf("Build compiler: %s\n", OPENSBI_BUILD_COMPILER_VERSION);
+#endif
+
 	sbi_printf(BANNER);
 }
 
@@ -293,8 +301,6 @@ static void __noreturn init_coldboot(struct sbi_scratch *scratch, u32 hartid)
 		sbi_hart_hang();
 	}
 
-	sbi_boot_print_general(scratch);
-
 	/*
 	 * Note: Finalize domains after HSM initialization so that we
 	 * can startup non-root domains.
@@ -307,8 +313,6 @@ static void __noreturn init_coldboot(struct sbi_scratch *scratch, u32 hartid)
 			   __func__, rc);
 		sbi_hart_hang();
 	}
-
-	sbi_boot_print_domains(scratch);
 
 	rc = sbi_hart_pmp_configure(scratch);
 	if (rc) {
@@ -327,6 +331,10 @@ static void __noreturn init_coldboot(struct sbi_scratch *scratch, u32 hartid)
 			   __func__, rc);
 		sbi_hart_hang();
 	}
+
+	sbi_boot_print_general(scratch);
+
+	sbi_boot_print_domains(scratch);
 
 	sbi_boot_print_hart(scratch, hartid);
 

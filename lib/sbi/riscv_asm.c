@@ -76,7 +76,8 @@ void misa_string(int xlen, char *out, unsigned int out_sz)
 			out[pos++] = '8';
 			break;
 		default:
-			BUG();
+			sbi_panic("%s: Unknown misa.MXL encoding %d",
+				   __func__, xlen);
 			return;
 		}
 	}
@@ -126,6 +127,11 @@ unsigned long csr_read_num(int csr_num)
 	switchcase_csr_read_4(CSR_MHPMCOUNTER4, ret)
 	switchcase_csr_read_8(CSR_MHPMCOUNTER8, ret)
 	switchcase_csr_read_16(CSR_MHPMCOUNTER16, ret)
+	switchcase_csr_read(CSR_MCOUNTINHIBIT, ret)
+	switchcase_csr_read(CSR_MHPMEVENT3, ret)
+	switchcase_csr_read_4(CSR_MHPMEVENT4, ret)
+	switchcase_csr_read_8(CSR_MHPMEVENT8, ret)
+	switchcase_csr_read_16(CSR_MHPMEVENT16, ret)
 #if __riscv_xlen == 32
 	switchcase_csr_read(CSR_MCYCLEH, ret)
 	switchcase_csr_read(CSR_MINSTRETH, ret)
@@ -133,10 +139,14 @@ unsigned long csr_read_num(int csr_num)
 	switchcase_csr_read_4(CSR_MHPMCOUNTER4H, ret)
 	switchcase_csr_read_8(CSR_MHPMCOUNTER8H, ret)
 	switchcase_csr_read_16(CSR_MHPMCOUNTER16H, ret)
+	switchcase_csr_read(CSR_MHPMEVENT3H, ret)
+	switchcase_csr_read_4(CSR_MHPMEVENT4H, ret)
+	switchcase_csr_read_8(CSR_MHPMEVENT8H, ret)
+	switchcase_csr_read_16(CSR_MHPMEVENT16H, ret)
 #endif
 
 	default:
-		BUG();
+		sbi_panic("%s: Unknown CSR %#x", __func__, csr_num);
 		break;
 	};
 
@@ -192,6 +202,10 @@ void csr_write_num(int csr_num, unsigned long val)
 	switchcase_csr_write_4(CSR_MHPMCOUNTER4H, val)
 	switchcase_csr_write_8(CSR_MHPMCOUNTER8H, val)
 	switchcase_csr_write_16(CSR_MHPMCOUNTER16H, val)
+	switchcase_csr_write(CSR_MHPMEVENT3H, val)
+	switchcase_csr_write_4(CSR_MHPMEVENT4H, val)
+	switchcase_csr_write_8(CSR_MHPMEVENT8H, val)
+	switchcase_csr_write_16(CSR_MHPMEVENT16H, val)
 #endif
 	switchcase_csr_write(CSR_MCOUNTINHIBIT, val)
 	switchcase_csr_write(CSR_MHPMEVENT3, val)
@@ -200,7 +214,7 @@ void csr_write_num(int csr_num, unsigned long val)
 	switchcase_csr_write_16(CSR_MHPMEVENT16, val)
 
 	default:
-		BUG();
+		sbi_panic("%s: Unknown CSR %#x", __func__, csr_num);
 		break;
 	};
 
@@ -247,14 +261,12 @@ int pmp_set(unsigned int n, unsigned long prot, unsigned long addr,
 	pmpcfg_csr   = (CSR_PMPCFG0 + (n >> 2)) & ~1;
 	pmpcfg_shift = (n & 7) << 3;
 #else
-	pmpcfg_csr   = -1;
-	pmpcfg_shift = -1;
+	return SBI_ENOTSUPP;
 #endif
 	pmpaddr_csr = CSR_PMPADDR0 + n;
-	if (pmpcfg_csr < 0 || pmpcfg_shift < 0)
-		return SBI_ENOTSUPP;
 
 	/* encode PMP config */
+	prot &= ~PMP_A;
 	prot |= (log2len == PMP_SHIFT) ? PMP_A_NA4 : PMP_A_NAPOT;
 	cfgmask = ~(0xffUL << pmpcfg_shift);
 	pmpcfg	= (csr_read_num(pmpcfg_csr) & cfgmask);
@@ -300,12 +312,9 @@ int pmp_get(unsigned int n, unsigned long *prot_out, unsigned long *addr_out,
 	pmpcfg_csr   = (CSR_PMPCFG0 + (n >> 2)) & ~1;
 	pmpcfg_shift = (n & 7) << 3;
 #else
-	pmpcfg_csr   = -1;
-	pmpcfg_shift = -1;
+	return SBI_ENOTSUPP;
 #endif
 	pmpaddr_csr = CSR_PMPADDR0 + n;
-	if (pmpcfg_csr < 0 || pmpcfg_shift < 0)
-		return SBI_ENOTSUPP;
 
 	/* decode PMP config */
 	cfgmask = (0xffUL << pmpcfg_shift);
