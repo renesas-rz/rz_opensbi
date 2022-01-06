@@ -77,7 +77,6 @@
 							(offset==SCIF_SEMR_0_OFFSET))
 
 #define SCBRR_VALUE(clk,baudrate) (clk/(64/2*baudrate)-1)
-#define SCMDDR_VALUE(clk,baudrate,brr) ((brr+1)*64/2*256*baudrate/clk)
 
 /*
  Local Typedef definitions
@@ -149,11 +148,6 @@ int scif_init(unsigned long base,unsigned long clk, unsigned long baudrate)
 	data16 = get_reg(SCIF_SEMR_0_OFFSET);
 	set_reg(SCIF_SEMR_0_OFFSET,data16 & (~SCIF_SEMR_MDDRS)); /* Select to access BRR */
 	set_reg(SCIF_BRR_0_OFFSET, SCBRR_VALUE(scif_clk,scif_baudrate));
-	
-
-	set_reg(SCIF_SEMR_0_OFFSET,(data16 | SCIF_SEMR_BRME | SCIF_SEMR_MDDRS)); /* Select to access MDDR */
-	data16 = SCBRR_VALUE(scif_clk,scif_baudrate);
-	set_reg(SCIF_BRR_0_OFFSET,SCMDDR_VALUE(scif_clk,scif_baudrate,data16));
 
 	scif_wait(baudrate);     /* wait */
 
