@@ -24,6 +24,7 @@
 #include "platform.h"
 #include "plicsw.h"
 #include "plmt.h"
+#include "pma.h"
 #include "cache.h"
 
 static struct plic_data plic = {
@@ -61,6 +62,7 @@ static int rzf_final_init(bool cold_boot)
 	fdt = sbi_scratch_thishart_arg1_ptr();
 	fdt_fixups(fdt);
 
+	init_pma();
 	return 0;
 }
 
@@ -139,6 +141,18 @@ static int rzf_vendor_ext_provider(long extid, long funcid,
 		break;
 	case SBI_EXT_ANDES_WRITE_AROUND:
 		ret = mcall_write_around(regs->a0);
+		break;
+	case SBI_EXT_ANDES_SET_PMA:
+		mcall_set_pma(regs->a0, regs->a1, regs->a2, regs->a3);
+		break;
+	case SBI_EXT_ANDES_FREE_PMA:
+		mcall_free_pma(regs->a0);
+		break;
+	case SBI_EXT_ANDES_PROBE_PMA:
+		*out_value = mcall_prob_pma();
+		break;
+	case SBI_EXT_ANDES_DCACHE_WBINVAL_ALL:
+		ret = mcall_dcache_wbinval_all();
 		break;
 	default:
 		sbi_printf("Unsupported vendor sbi call : %ld\n", funcid);

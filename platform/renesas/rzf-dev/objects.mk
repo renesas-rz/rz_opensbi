@@ -9,4 +9,4 @@
 #
 # Copyright (c) 2021 Renesas Electronics Corporation
 
-platform-objs-y += cache.o platform.o plicsw.o plmt.o
+platform-objs-y += cache.o platform.o plicsw.o plmt.o pma.o

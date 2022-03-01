@@ -30,6 +30,14 @@
 
 #define RZFIVE_MTIMER_FREQ 12000000
 
+/* Configuration Registers */
+#define CSR_MICM_CFG        0xfc0
+#define CSR_MDCM_CFG        0xfc1
+#define CSR_MMSC_CFG        0xfc2
+#define CSR_MMSC_CFG2       0xfc3
+#define CSR_MVEC_CFG        0xfc7
+
+
 /*Memory and Miscellaneous Registers*/
 #define CSR_MILMB		0x7c0
 #define CSR_MDLMB		0x7c1
@@ -55,6 +63,10 @@ enum sbi_ext_andes_fid {
 	SBI_EXT_ANDES_L1CACHE_D_PREFETCH,
 	SBI_EXT_ANDES_NON_BLOCKING_LOAD_STORE,
 	SBI_EXT_ANDES_WRITE_AROUND,
+	SBI_EXT_ANDES_SET_PMA,
+	SBI_EXT_ANDES_FREE_PMA,
+	SBI_EXT_ANDES_PROBE_PMA,
+	SBI_EXT_ANDES_DCACHE_WBINVAL_ALL,
 };
 
 /* nds v5 mmisc_ctl register*/
