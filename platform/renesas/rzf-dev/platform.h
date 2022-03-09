@@ -31,6 +31,7 @@
 #define RZFIVE_MTIMER_FREQ 12000000
 
 /* Configuration Registers */
+#define CSR_MISA_CFG		0x301
 #define CSR_MICM_CFG        0xfc0
 #define CSR_MDCM_CFG        0xfc1
 #define CSR_MMSC_CFG        0xfc2
@@ -67,6 +68,12 @@ enum sbi_ext_andes_fid {
 	SBI_EXT_ANDES_FREE_PMA,
 	SBI_EXT_ANDES_PROBE_PMA,
 	SBI_EXT_ANDES_DCACHE_WBINVAL_ALL,
+
+	// for the linux kernel.
+	SBI_EXT_ANDES_GET_MICM_CTL_STATUS,
+	SBI_EXT_ANDES_GET_MDCM_CTL_STATUS,
+	SBI_EXT_ANDES_GET_MMSC_CTL_STATUS,
+	SBI_EXT_ANDES_GET_MISA_CTL_STATUS,
 };
 
 /* nds v5 mmisc_ctl register*/

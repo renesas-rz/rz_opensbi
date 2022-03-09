@@ -28,7 +28,7 @@ unsigned long mcall_prob_pma(void)
     return ((csr_read(CSR_MMSC_CFG) & 0x40000000) != 0);
 }
 
-void mcall_set_pma(unsigned int pa, unsigned long va, unsigned long size, unsigned long entry_id)
+unsigned long mcall_set_pma(unsigned int pa, unsigned long va, unsigned long size, unsigned long entry_id)
 {
 	int power = 0;
 	unsigned long size_tmp, shift = 0, pmacfg_val;
@@ -36,7 +36,7 @@ void mcall_set_pma(unsigned int pa, unsigned long va, unsigned long size, unsign
 	unsigned long mmsc = csr_read(CSR_MMSC_CFG);
 
 	if ((mmsc & PMA_MMSC_CFG) == 0)
-		return;
+		return 0;
 
 	if ((pa & (size - 1)) !=0) {
 		pa = pa & ~(size - 1);
@@ -75,10 +75,12 @@ void mcall_set_pma(unsigned int pa, unsigned long va, unsigned long size, unsign
 		write_pmacfg(entry_id / 4, pmacfg_val);
 #endif
 		write_pmaaddr(entry_id, pa);
-		return;
+		return read_pmaaddr(entry_id);
 	}
 	/* There is no available pma register */
 	__asm__("ebreak");
+
+      return 0;
 }
 
 void mcall_free_pma(unsigned long entry_id)
@@ -131,6 +133,46 @@ inline void write_pmaaddr(int i, unsigned long val)
         csr_write(PMAADDR_15, val);
 }
 
+inline unsigned long read_pmaaddr(int i)
+{
+      unsigned long ret = 0;
+
+  if (i == 0)
+        ret = csr_read(PMAADDR_0);
+  else if (i == 1)
+        ret = csr_read(PMAADDR_1);
+  else if (i == 2)
+        ret = csr_read(PMAADDR_2);
+  else if (i == 3)
+        ret = csr_read(PMAADDR_3);
+  else if (i == 4)
+        ret = csr_read(PMAADDR_4);
+  else if (i == 5)
+        ret = csr_read(PMAADDR_5);
+  else if (i == 6)
+       ret =  csr_read(PMAADDR_6);
+  else if (i == 7)
+        ret = csr_read(PMAADDR_7);
+  else if (i == 8)
+        ret = csr_read(PMAADDR_8);
+  else if (i == 9)
+        ret = csr_read(PMAADDR_9);
+  else if (i == 10)
+        ret = csr_read(PMAADDR_10);
+  else if (i == 11)
+        ret = csr_read(PMAADDR_11);
+  else if (i == 12)
+        ret = csr_read(PMAADDR_12);
+  else if (i == 13)
+        ret = csr_read(PMAADDR_13);
+  else if (i == 14)
+        ret = csr_read(PMAADDR_14);
+  else if (i == 15)
+        ret = csr_read(PMAADDR_15);
+
+      return ret;
+}
+
 inline unsigned long read_pmacfg(int i)
 {
   unsigned long val=0;
@@ -171,4 +213,3 @@ inline void write_pmacfg(int i, unsigned long val)
         csr_write(PMACFG_3, val);
 #endif
 }
-

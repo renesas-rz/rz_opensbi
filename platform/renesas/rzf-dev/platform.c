@@ -143,7 +143,7 @@ static int rzf_vendor_ext_provider(long extid, long funcid,
 		ret = mcall_write_around(regs->a0);
 		break;
 	case SBI_EXT_ANDES_SET_PMA:
-		mcall_set_pma(regs->a0, regs->a1, regs->a2, regs->a3);
+		*out_value = mcall_set_pma(regs->a0, regs->a1, regs->a2, regs->a3);
 		break;
 	case SBI_EXT_ANDES_FREE_PMA:
 		mcall_free_pma(regs->a0);
@@ -153,6 +153,18 @@ static int rzf_vendor_ext_provider(long extid, long funcid,
 		break;
 	case SBI_EXT_ANDES_DCACHE_WBINVAL_ALL:
 		ret = mcall_dcache_wbinval_all();
+		break;
+	case SBI_EXT_ANDES_GET_MICM_CTL_STATUS:
+		*out_value = csr_read(CSR_MICM_CFG);
+		break;
+	case SBI_EXT_ANDES_GET_MDCM_CTL_STATUS:
+		*out_value = csr_read(CSR_MDCM_CFG);
+		break;
+	case SBI_EXT_ANDES_GET_MMSC_CTL_STATUS:
+		*out_value = csr_read(CSR_MMSC_CFG);
+		break;
+	case SBI_EXT_ANDES_GET_MISA_CTL_STATUS:
+		*out_value = csr_read(CSR_MISA_CFG);
 		break;
 	default:
 		sbi_printf("Unsupported vendor sbi call : %ld\n", funcid);

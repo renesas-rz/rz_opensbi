@@ -43,13 +43,13 @@
 extern unsigned long pma_used_table[PMA_NUM];
 
 void write_pmaaddr(int i, unsigned long val);
+unsigned long read_pmaaddr(int i);
 
 unsigned long read_pmacfg(int i);
-
 void write_pmacfg(int i, unsigned long val);
 
 unsigned long mcall_prob_pma(void);
-void mcall_set_pma(unsigned int pa, unsigned long va, unsigned long size, unsigned long entry_id);
+unsigned long mcall_set_pma(unsigned int pa, unsigned long va, unsigned long size, unsigned long entry_id);
 void mcall_free_pma(unsigned long va);
 
 void init_pma(void);
