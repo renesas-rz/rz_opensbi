@@ -46,7 +46,18 @@ static int rzf_final_init(bool cold_boot)
 		mcache_ctl_val |= V5_MCACHE_CTL_DC_EN;
 	if (!(mcache_ctl_val & V5_MCACHE_CTL_CCTL_SUEN))
 		mcache_ctl_val |= V5_MCACHE_CTL_CCTL_SUEN;
+	if (!(mcache_ctl_val & V5_MCACHE_CTL_L1I_PREFETCH_EN))
+		mcache_ctl_val |= V5_MCACHE_CTL_L1I_PREFETCH_EN;
+	if (!(mcache_ctl_val & V5_MCACHE_CTL_L1D_PREFETCH_EN))
+		mcache_ctl_val |= V5_MCACHE_CTL_L1D_PREFETCH_EN;
+	mcache_ctl_val &= ~(V5_MCACHE_CTL_DC_WAROUND_1_EN | V5_MCACHE_CTL_DC_WAROUND_2_EN);
+	mcache_ctl_val |= V5_MCACHE_CTL_DC_WAROUND_1_EN;
 	csr_write(CSR_MCACHECTL, mcache_ctl_val);
+
+	uintptr_t mmisc_ctl_val = csr_read(CSR_MMISCCTL);
+	if (!(mmisc_ctl_val & V5_MMISC_CTL_NON_BLOCKING_EN))
+		mmisc_ctl_val |= V5_MMISC_CTL_NON_BLOCKING_EN;
+	csr_write(CSR_MMISCCTL, mmisc_ctl_val);
 
 	/* enable L2 cache */
 	uint32_t *l2c_ctl_base = (void *)RZF_L2C_ADDR + V5_L2C_CTL_OFFSET;
