@@ -32,6 +32,15 @@ static struct plic_data plic = {
 	.num_src = RZF_PLIC_NUM_SOURCES,
 };
 
+static void sbi_clear_mmiscctl_msa(void)
+{
+	unsigned long mmisc_ctl;
+
+	mmisc_ctl = csr_read(CSR_MMISCCTL);
+	mmisc_ctl &= ~(V5_MMISC_CTL_MSA_OR_UNA_EN);
+	csr_write(CSR_MMISCCTL, mmisc_ctl);
+}
+
 /* Platform final initialization. */
 static int rzf_final_init(bool cold_boot)
 {
@@ -102,6 +111,8 @@ static int rzf_irqchip_init(bool cold_boot)
 static int rzf_early_init(bool cold_boot)
 {
 	int ret=0;
+
+	sbi_clear_mmiscctl_msa();
 
 	if (cold_boot) {
 		ret = plmt_cold_timer_init(RZF_PLMT_ADDR,
