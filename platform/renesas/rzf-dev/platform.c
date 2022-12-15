@@ -41,6 +41,22 @@ static void sbi_clear_mmiscctl_msa(void)
 	csr_write(CSR_MMISCCTL, mmisc_ctl);
 }
 
+static void rzf_enable_cache(void)
+{
+	uintptr_t mcache_ctl_val = csr_read(CSR_MCACHECTL);
+
+	mcache_ctl_val |= V5_MCACHE_CTL_DC_EN;
+	csr_write(CSR_MCACHECTL, mcache_ctl_val);
+}
+
+static void rzf_disable_cache(void)
+{
+	uintptr_t mcache_ctl_val = csr_read(CSR_MCACHECTL);
+
+	mcache_ctl_val &= ~V5_MCACHE_CTL_DC_EN;
+	csr_write(CSR_MCACHECTL, mcache_ctl_val);
+}
+
 /* Platform final initialization. */
 static int rzf_final_init(bool cold_boot)
 {
@@ -52,7 +68,7 @@ static int rzf_final_init(bool cold_boot)
 	if (!(mcache_ctl_val & V5_MCACHE_CTL_IC_EN))
 		mcache_ctl_val |= V5_MCACHE_CTL_IC_EN;
 	if (!(mcache_ctl_val & V5_MCACHE_CTL_DC_EN))
-		mcache_ctl_val |= V5_MCACHE_CTL_DC_EN;
+		mcache_ctl_val &= ~V5_MCACHE_CTL_DC_EN;
 	if (!(mcache_ctl_val & V5_MCACHE_CTL_CCTL_SUEN))
 		mcache_ctl_val |= V5_MCACHE_CTL_CCTL_SUEN;
 	if (!(mcache_ctl_val & V5_MCACHE_CTL_L1I_PREFETCH_EN))
@@ -187,6 +203,13 @@ static int rzf_vendor_ext_provider(long extid, long funcid,
 		break;
 	case SBI_EXT_ANDES_GET_MISA_CTL_STATUS:
 		*out_value = csr_read(CSR_MISA_CFG);
+		break;
+	case SBI_EXT_ANDES_ENABLE_CACHE:
+		rzf_enable_cache();
+		break;
+	case SBI_EXT_ANDES_DISABLE_CACHE:
+		rzf_disable_cache();
+		*out_value = 0;
 		break;
 	default:
 		sbi_printf("Unsupported vendor sbi call : %ld\n", funcid);
