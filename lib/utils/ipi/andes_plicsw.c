@@ -99,16 +99,14 @@ int plicsw_cold_ipi_init(struct plicsw_data *plicsw)
 			       PLICSW_ENABLE_STRIDE * i + 4 * word_index;
 		writel(BIT(enable_bit), (void *)enable_reg);
 	}
-
 	/* Add PLICSW region to the root domain */
 	rc = sbi_domain_root_add_memrange(plicsw->addr, plicsw->size,
-					  PLICSW_REGION_ALIGN,
+					  plicsw->size,
 					  SBI_DOMAIN_MEMREGION_MMIO |
 					  SBI_DOMAIN_MEMREGION_M_READABLE |
 					  SBI_DOMAIN_MEMREGION_M_WRITABLE);
 	if (rc)
 		return rc;
-
 	sbi_ipi_set_device(&plicsw_ipi);
 
 	return 0;

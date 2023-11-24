@@ -32,6 +32,13 @@ static int renesas_rzfive_final_init(bool cold_boot, const struct fdt_match *mat
 
 static int renesas_rzfive_early_init(bool cold_boot, const struct fdt_match *match)
 {
+	int ret;
+
+	ret = sbi_domain_root_add_memrange(0x2000000000, 0x2000000000, 0x2000000000,
+					   SBI_DOMAIN_MEMREGION_SUM_RW_NOX);
+	if (ret)
+		return ret;
+
 	/*
 	 * Renesas RZ/Five RISC-V SoC has Instruction local memory and
 	 * Data local memory (ILM & DLM) mapped between region 0x30000
