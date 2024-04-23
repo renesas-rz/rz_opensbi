@@ -242,11 +242,14 @@ static unsigned long ctz(unsigned long x)
 	return ret;
 }
 
+#define PMP_LOCK_MASK 0x80
+#define PMP_CFG_MASK 0x7F
+
 int pmp_set(unsigned int n, unsigned long prot, unsigned long addr,
 	    unsigned long log2len)
 {
 	int pmpcfg_csr, pmpcfg_shift, pmpaddr_csr;
-	unsigned long cfgmask, pmpcfg;
+	unsigned long cfgmask, pmpcfg, pmpcfg_lock;
 	unsigned long addrmask, pmpaddr;
 
 	/* check parameters */
@@ -270,7 +273,10 @@ int pmp_set(unsigned int n, unsigned long prot, unsigned long addr,
 	prot |= (log2len == PMP_SHIFT) ? PMP_A_NA4 : PMP_A_NAPOT;
 	cfgmask = ~(0xffUL << pmpcfg_shift);
 	pmpcfg	= (csr_read_num(pmpcfg_csr) & cfgmask);
-	pmpcfg |= ((prot << pmpcfg_shift) & ~cfgmask);
+	pmpcfg_lock = pmpcfg;
+
+	pmpcfg |= (((prot & PMP_CFG_MASK) << pmpcfg_shift) & ~cfgmask);
+	pmpcfg_lock |= ((prot << pmpcfg_shift) & ~cfgmask);
 
 	/* encode PMP address */
 	if (log2len == PMP_SHIFT) {
@@ -288,6 +294,8 @@ int pmp_set(unsigned int n, unsigned long prot, unsigned long addr,
 	/* write csrs */
 	csr_write_num(pmpaddr_csr, pmpaddr);
 	csr_write_num(pmpcfg_csr, pmpcfg);
+	if (prot & PMP_LOCK_MASK)
+		csr_write_num(pmpcfg_csr, pmpcfg_lock);
 
 	return 0;
 }

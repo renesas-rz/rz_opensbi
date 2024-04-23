@@ -134,6 +134,10 @@ static int rzf_early_init(bool cold_boot)
 				     RZF_HART_COUNT);
 	}
 
+	sbi_domain_root_add_memrange(0x2000000000,
+				     0x2000000000,
+				     0x2000000000,
+				     SBI_DOMAIN_MEMREGION_SUM_RW_NOX);
 	/*
 	 * Renesas RZ/Five RISC-V SoC has Instruction local memory and
 	 * Data local memory (ILM & DLM) mapped between region 0x30000
