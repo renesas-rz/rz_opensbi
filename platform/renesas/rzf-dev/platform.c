@@ -12,6 +12,7 @@
 
 #include <sbi/riscv_asm.h>
 #include <sbi/riscv_encoding.h>
+#include <sbi/riscv_io.h>
 #include <sbi/sbi_console.h>
 #include <sbi/sbi_const.h>
 #include <sbi/sbi_domain.h>
@@ -27,6 +28,9 @@
 #include "plmt.h"
 #include "pma.h"
 #include "cache.h"
+
+static volatile void *rzf_sysc_base;
+static volatile void *rzf_gpv_ax45mp_mem_base;
 
 static struct plic_data plic = {
 	.addr = RZF_PLIC_ADDR,
@@ -58,10 +62,29 @@ static void rzf_disable_cache(void)
 	csr_write(CSR_MCACHECTL, mcache_ctl_val);
 }
 
+static void rzf_gpv_ax45mp_mem_init(void)
+{
+	unsigned long sysc_base = RZF_SYSC_BASE_ADDR;
+	unsigned long gpv_ax45mp_mem_base = RZF_GPV_AX45MP_MEM_ADDR;
+
+	rzf_sysc_base = (volatile void *)sysc_base;
+	rzf_gpv_ax45mp_mem_base = (volatile void *)gpv_ax45mp_mem_base;
+
+	/* Grant access permission to GPV areas */
+	writel(0, rzf_sysc_base + RZF_SYSC_SYS_SLVACCCTL0);
+	writel(0, rzf_sysc_base + RZF_SYSC_SYS_SLVACCCTL1);
+
+	/* Init settings for GPV AX45MP MEM to avoid unexpected bus errors */
+	writel(1, rzf_gpv_ax45mp_mem_base + RZF_GPV_AX45MP_MEM_FN_MOD2);
+}
+
 /* Platform final initialization. */
 static int rzf_final_init(bool cold_boot)
 {
 	void *fdt;
+
+	/* GPV AX45MP MEM initial settings */
+	rzf_gpv_ax45mp_mem_init();
 
 	/* enable L1 cache */
 	uintptr_t mcache_ctl_val = csr_read(CSR_MCACHECTL);
