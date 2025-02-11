@@ -6,10 +6,15 @@
 
 #include <andes/andes_pma.h>
 #include <andes/andes_pmu.h>
+#include <andes/andes.h>
 #include <andes/andes_sbi.h>
 #include <platform_override.h>
+#include <sbi/riscv_io.h>
 #include <sbi/sbi_domain.h>
 #include <sbi_utils/fdt/fdt_helper.h>
+
+static volatile void *rzf_sysc_base;
+static volatile void *rzf_gpv_ax45mp_mem_base;
 
 static const struct andes_pma_region renesas_rzfive_pma_regions[] = {
 	{
@@ -24,8 +29,27 @@ static const struct andes_pma_region renesas_rzfive_pma_regions[] = {
 	},
 };
 
+static void rzf_gpv_ax45mp_mem_init(void)
+{
+	unsigned long sysc_base = RZF_SYSC_BASE_ADDR;
+	unsigned long gpv_ax45mp_mem_base = RZF_GPV_AX45MP_MEM_ADDR;
+
+	rzf_sysc_base = (volatile void *)sysc_base;
+	rzf_gpv_ax45mp_mem_base = (volatile void *)gpv_ax45mp_mem_base;
+
+	/* Grant access permission to GPV areas */
+	writel(0, rzf_sysc_base + RZF_SYSC_SYS_SLVACCCTL0);
+	writel(0, rzf_sysc_base + RZF_SYSC_SYS_SLVACCCTL1);
+
+	/* Init settings for GPV AX45MP MEM to avoid unexpected bus errors */
+	writel(1, rzf_gpv_ax45mp_mem_base + RZF_GPV_AX45MP_MEM_FN_MOD2);
+}
+
 static int renesas_rzfive_final_init(bool cold_boot, const struct fdt_match *match)
 {
+	/* GPV AX45MP MEM initial settings */
+	rzf_gpv_ax45mp_mem_init();
+
 	return andes_pma_setup_regions(renesas_rzfive_pma_regions,
 				       array_size(renesas_rzfive_pma_regions));
 }
